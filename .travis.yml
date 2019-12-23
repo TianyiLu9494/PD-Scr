@@ -1,0 +1,21 @@
+sudo: true
+dist: xenial 
+services:
+  - docker
+language: python 
+python:
+  - "3.5"
+
+before_install:
+  - pip3 install cwltool
+  - docker build -t PD-Scr .
+
+script:
+  # Both of these same tests, in Docker
+  # Functional tests
+  - docker run --entrypoint /PD-Scr/.travis/unit-test.sh PD-Scr
+  # Unit tests
+  - docker run --entrypoint /PD-Scr/functional_tests/PD-Scr-test.sh PD-Scr -p PD-Scr -d /PD-Scr/functional_tests/test_data -v
+
+  # CWL definition test
+  - cwltool PD-Scr.cwl --fasta_file functional_tests/test_data/two_sequence.fasta
